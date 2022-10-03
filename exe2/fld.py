@@ -93,7 +93,7 @@ def visualization_test():
     result = fld.predict_class(all_class_samples)
     fld.plot_hyperplane()
     print(result, np.sum(result))
-
+    plt.grid(axis = 'both')
     plt.show()
 
 if __name__ == "__main__":
@@ -111,6 +111,7 @@ if __name__ == "__main__":
 
     print("Train set accuracy: %f, train set error rate: %f"%(train_set_acc, 1 - train_set_acc))
     print("Test set accuracy: %f, test set error rate: %f"%(test_set_acc, 1 - test_set_acc))
+    # visualization_test()
 
 
     

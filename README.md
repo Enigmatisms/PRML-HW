@@ -4,7 +4,7 @@ Computer programming homework for PRML course of Tsinghua Prof. Xuegong Zhang
 
 ---
 
-### 10.1 HW3
+### 10.1 HW2
 
 完成了FDL的实现以及2D可视化，完成了Perceptron/Logistic Regression的使用（基于scikit-learn）
 
@@ -21,6 +21,6 @@ python3 -m pip install -r requirements.txt
 除了FDL之外，其余的两个实验均使用Jupyter Notebook，这里不再赘述`.ipynb`的执行方法，欲查看FDL实验的结果，请执行：
     
 ```shell
-cd exe3/
+cd exe2/
 python3 ./fdl.py
 ```

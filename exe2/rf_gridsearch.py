@@ -1,7 +1,7 @@
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import StratifiedKFold, GridSearchCV
 from utils import *
-import pandas as pd
+import matplotlib.pyplot as plt
 
 def grid_search_params():
     parameters = {'n_estimators': list(range(50, 81, 5)),
@@ -37,4 +37,8 @@ if __name__ == '__main__':
         line = line.split(',')
     all_items = list(zip(importance, line))
     all_items.sort(key = lambda x: x[0], reverse = True)
+
+    plt.bar([item[1] for item in all_items[:20]], [item[0] for item in all_items[:20]])
+    plt.xticks(rotation = 75)
     print(all_items)
+    plt.show()

@@ -97,7 +97,10 @@ def visualization_test():
     plt.show()
 
 if __name__ == "__main__":
-    from utils import *
+    import sys
+    sys.path.append("..")
+    from general.utils import *
+    
     fld = FLD()
     train_pos, train_neg, raw_set, labels = get_samples("./data/train1_icu_data.csv", "./data/train1_icu_label.csv", ret_raw = True)
     _, _, raw_test, test_labels = get_samples("./data/test1_icu_data.csv", "./data/test1_icu_label.csv", ret_raw = True)

@@ -1,6 +1,8 @@
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import StratifiedKFold, GridSearchCV
-from utils import *
+import sys
+sys.path.append("..")
+from general.utils import *
 import matplotlib.pyplot as plt
 
 def grid_search_params():

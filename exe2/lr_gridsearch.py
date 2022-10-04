@@ -1,6 +1,8 @@
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import StratifiedKFold, GridSearchCV
-from utils import *
+import sys
+sys.path.append("..")
+from general.utils import *
 
 def grid_search_params():
     parameters = {'max_iter': list(range(200, 401, 25)),

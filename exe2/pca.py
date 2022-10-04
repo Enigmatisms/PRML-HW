@@ -6,7 +6,9 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
-from utils import data_whitening
+import sys
+sys.path.append("..")
+from general.utils import data_whitening
 
 class PCA:
     def __init__(self, n_components = 3, whiten = False):

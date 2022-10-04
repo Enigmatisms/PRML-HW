@@ -24,3 +24,37 @@ python3 -m pip install -r requirements.txt
 cd exe2/
 python3 ./fdl.py
 ```
+
+---
+
+### 10.4 HW3
+
+​		调用`sklearn`中实现的`KNN`算法，采取了三种不同的策略：
+
+- KNN default setting (由`sklearn`库定义，例如其`n_neighbors = 5`)
+- KNN，并且进行`GridSearchCV`
+- KNN default setting，但输入使用PCA降维
+
+​		代码中目前只保留了前两种方案，如果要测试PCA降维，请将代码的`25-27`行解注释：
+
+```python
+# pca = PCA(n_components = 16)
+# train_set = pca.fit_transform(train_set, train_label)
+# test_set = pca.fit_transform(test_set, test_label)
+```
+
+​		如果要运行代码，此处有三种可能的运行选择 （首先得`cd exe3/`）：
+
+```shell
+python3 ./knn_gridsearch.py 0
+python3 ./knn_gridsearch.py 1
+python3 ./knn_gridsearch.py
+```
+
+​		第一种运行方式：代表使用默认参数运行
+
+​		第二种运行方式：代表使用Grid Search结果参数运行
+
+​		第三种运行方式：代表进行Grid Search
+
+​		每一种方式结束后，都会执行`k=3-49`的`n_neighbors`对训练、测试集精度影响分析的绘图。

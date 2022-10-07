@@ -5,7 +5,6 @@
     Date: 2022.10.7
 """
 
-
 import math
 import torch
 from torch import nn
@@ -48,9 +47,11 @@ class LinearLayerCore(Function):
 
         return grad_input, grad_weight, grad_bias
 
+"""
+    This module is similar to nn.Linear
+"""
 class LinearLayer(nn.Module):
     def __init__(self, input_features, output_features, bias=True):
-        nn.Linear
         super().__init__()
         self.input_features = input_features
         self.output_features = output_features

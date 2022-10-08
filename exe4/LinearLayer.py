@@ -30,8 +30,6 @@ class LinearLayerCore(Function):
         input, weight, bias = ctx.saved_tensors
         grad_input = grad_weight = grad_bias = None
 
-        print(grad_output.shape, weight.shape, input.shape)
-        print(id(grad_output))
         # calculate gradient with respect to input (in problem set 4, we found that this term is used in the layer before)
         # You can refer to my homework (Problem set 4, equation (11) to find out)
         if ctx.needs_input_grad[0]:
@@ -48,7 +46,7 @@ class LinearLayerCore(Function):
         return grad_input, grad_weight, grad_bias
 
 """
-    This module is similar to nn.Linear
+    This module takes the form of nn.Linear
 """
 class LinearLayer(nn.Module):
     def __init__(self, input_features, output_features, bias=True):

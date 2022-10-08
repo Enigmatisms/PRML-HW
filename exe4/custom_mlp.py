@@ -13,7 +13,7 @@ import argparse
 from datetime import datetime
 from torch.utils.tensorboard import SummaryWriter
 from torch.utils.data import TensorDataset, DataLoader
-sys.path.add("..")
+sys.path.append("..")
 from general.utils import get_samples
 
 
@@ -44,7 +44,7 @@ def saveModel(model, path:str, other_stuff: dict = None, opt = None, amp = None)
     torch.save(checkpoint, path)
 
 # I skipped batch normalization because the network is shallow
-def make_linear_block(in_chan: int, out_chan: int, act = nn.ReLU, drop_out = -1.):
+def make_linear_block(in_chan: int, out_chan: int, act = nn.ReLU(), drop_out = -1.):
     layers = [LinearLayer(in_chan, out_chan)]
     if drop_out > 0.:
         layers.append(nn.Dropout(drop_out))
@@ -56,21 +56,23 @@ class MLP(nn.Module):
     def __init__(self, input_dim = 108, emb_dim = 256, drop_1 = 0.05, drop_2 = 0.1):
         super().__init__()
         self.lin1 = nn.Sequential(
-            *make_linear_block(input_dim, emb_dim, drop = drop_1),
-            *make_linear_block(emb_dim, emb_dim, drop = drop_1),
-            *make_linear_block(emb_dim, emb_dim >> 1, drop = drop_1),
+            *make_linear_block(input_dim, emb_dim, drop_out = drop_1),
+            *make_linear_block(emb_dim, emb_dim, drop_out = drop_1),
+            *make_linear_block(emb_dim, emb_dim >> 1, drop_out = drop_1),
         )
 
         self.lin2 = nn.Sequential(
-            *make_linear_block((emb_dim >> 1) + input_dim, emb_dim, drop = drop_2),
-            *make_linear_block(emb_dim, emb_dim, drop = drop_2),
-            *make_linear_block(emb_dim, emb_dim >> 1, drop = drop_2),
-            *make_linear_block(emb_dim >> 1, 1, nn.Sigmoid(), drop = drop_2),
+            *make_linear_block((emb_dim >> 1) + input_dim, emb_dim, drop_out = drop_2),
+            *make_linear_block(emb_dim, emb_dim, drop_out = drop_2),
+            *make_linear_block(emb_dim, emb_dim >> 1, drop_out = drop_2),
+            *make_linear_block(emb_dim >> 1, 1, nn.Sigmoid(), drop_out = drop_2),
         )
         self.emb_dim = emb_dim
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        return torch.sum(x * self.p, dim = -1, keepdim = True)
+        tmp = self.lin1.forward(x)
+        x = torch.cat((x, tmp), dim = -1)
+        return self.lin2.forward(x)
 
     def loadFromFile(self, load_path:str, use_amp = False, opt = None, other_stuff = None):
         save = torch.load(load_path)   
@@ -98,17 +100,17 @@ def acc_calculator(pred_y: torch.Tensor, target: torch.Tensor) -> float:
     return total_correct / pred_y.numel()
 
 if __name__ == "__main__":
-
+    torch.manual_seed(3407)
     parser = argparse.ArgumentParser()
-    parser.add_argument("--epochs", type = int, default = 3000, help = "Training lasts for . epochs")
+    parser.add_argument("--epochs", type = int, default = 200, help = "Training lasts for . epochs")
     parser.add_argument("--batch_size", type = int, default = 200, help = "Training lasts for . epochs")
-    parser.add_argument("--eval_time", type = int, default = 20, help = "Tensorboard output interval (train time)")
-    parser.add_argument("--output_time", type = int, default = 250, help = "Image output interval (train time)")
+    parser.add_argument("--eval_time", type = int, default = 50, help = "Tensorboard output interval (train time)")
+    parser.add_argument("--output_time", type = int, default = 10, help = "Image output interval (train time)")
     # 0.0000001 (2)  0.00001 (3) 0.0001(2) 0.001(2) 0.01(2) 0.000001 (1) 0 (2)
     parser.add_argument("--name", type = str, default = "chkpt_001", help = "Checkpoint file name")
     parser.add_argument("--opt_mode", type = str, default = "O2", help = "Optimization mode: none, O1, O2 (apex amp)")
-    parser.add_argument("--decay_rate", type = float, default = 0.994, help = "After <decay step>, lr = lr * <decay_rate>")
-    parser.add_argument("--lr", type = float, default = 0.1, help = "Start lr")
+    parser.add_argument("--decay_rate", type = float, default = 0.996, help = "After <decay step>, lr = lr * <decay_rate>")
+    parser.add_argument("--lr", type = float, default = 1e-3, help = "Start lr")
 
     parser.add_argument("-d", "--del_dir", default = False, action = "store_true", help = "Delete dir ./logs and start new tensorboard records")
     parser.add_argument("-l", "--load", default = False, action = "store_true", help = "Load checkpoint or trained model.")
@@ -131,13 +133,13 @@ if __name__ == "__main__":
     opt = optim.Adam(clf.parameters(), lr = args.lr)
     sch = optim.lr_scheduler.ExponentialLR(opt, args.decay_rate)
 
-    _, _, np_train, np_train_labels = get_samples("./data/train1_icu_data.csv", "./data/train1_icu_label.csv", ret_raw = True)
-    _, _, np_test, np_test_labels = get_samples("./data/test1_icu_data.csv", "./data/test1_icu_label.csv", ret_raw = True)
+    _, _, np_train, np_train_labels = get_samples("../exe2/data/train1_icu_data.csv", "../exe2/data/train1_icu_label.csv", ret_raw = True)
+    _, _, np_test, np_test_labels = get_samples("../exe2/data/test1_icu_data.csv", "../exe2/data/test1_icu_label.csv", ret_raw = True)
 
-    train_set = torch.from_numpy(np_train)
-    test_set = torch.from_numpy(np_test)
-    train_labels = torch.from_numpy(np_train_labels)
-    test_labels = torch.from_numpy(np_test_labels)
+    train_set = torch.from_numpy(np_train).float()
+    test_set = torch.from_numpy(np_test).float()
+    train_labels = torch.from_numpy(np_train_labels).float()
+    test_labels = torch.from_numpy(np_test_labels).float()
 
     train_dataset = TensorDataset(train_set, train_labels)
     test_dataset = TensorDataset(test_set, test_labels)
@@ -162,6 +164,8 @@ if __name__ == "__main__":
 
     for ep in range(ep_start, epochs):
         for i, (train_x, train_y) in enumerate(train_loader):
+            train_x = train_x.cuda()
+            train_y = train_y.cuda()
             train_timer.tic()
             pred_y = clf.forward(train_x)
             loss: torch.Tensor = loss_func(pred_y, train_y)
@@ -175,10 +179,10 @@ if __name__ == "__main__":
             opt.step()
             sch.step()
             train_timer.toc()
-            acc_train += acc_calculator(pred_y, train_y)
+            acc_train += acc_calculator(pred_y, train_y.int())
             train_cnt += 1
 
-            if train_cnt % eval_time and ep > 0:
+            if train_cnt % eval_time == 0:
                 acc_train /= eval_time
                 lr = sch.get_last_lr()[-1]
 
@@ -197,16 +201,18 @@ if __name__ == "__main__":
                 test_loss = 0.
                 test_cnt = 0
                 for (test_x, test_y) in test_loader:
+                    test_x = test_x.cuda()
+                    test_y = test_y.cuda()
                     pred_test_y = clf.forward(test_x)
                     test_loss += loss_func(pred_test_y, test_y)
-                    test_acc += acc_calculator(pred_test_y, test_y)
+                    test_acc += acc_calculator(pred_test_y, test_y.int())
                     test_cnt += 1
                 test_loss /= test_cnt
                 test_acc /= test_cnt         
                 writer.add_scalar('Loss/Test Loss', test_loss, ep)           
                 writer.add_scalar('Accuracy/Test Acc', test_acc, ep)    
                 print("Testing Epoch: %4d / %4d\ttest loss: %.4f\ttest acc: %.3lf. Starting Next Epoch..."%(ep, epochs, test_loss.item(), test_acc))       
-                saveModel(clf, "%schkpt_%d.pt"%("./check_points/", test_cnt), {"epoch": ep}, opt = opt, amp = (amp) if use_amp else None)
+                saveModel(clf, "%schkpt_%d.pt"%("./check_points/", ep), {"epoch": ep}, opt = opt, amp = (amp) if use_amp else None)
             clf.train()
     writer.close()
     print("Output completed.")

@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import torch.nn.functional as F
 from torch import nn
 from torch import optim
-
+import random
 
 class Penalty(nn.Module):
     def __init__(self, k1 = 0.01, k2 = 500.): 
@@ -25,6 +25,45 @@ class Alpha(nn.Module):
         temp = self.params * label * data
         return 0.5 * torch.sum(temp @ temp.T) - torch.sum(self.params)
 
+# def stochastic_coordinate_descend(data: torch.Tensor, label: torch.Tensor, max_num: int, epochs: int):
+#     choices = list(range(max_num))
+#     last_choice = None
+#     params = torch.ones(max_num) * 0.5    # uniform distribution [0, 2]
+#     for _ in range(epochs):
+#         choice = sorted(random.sample(choices, k = 2))
+#         while choice == last_choice:
+#             choice = sorted(random.sample(choices, k = 2))
+#         last_choice = choice
+#         choice_set = set(choice)
+#         y1, y2 = label[choice[0], 0], label[choice[1], 0]
+#         x1 = data[choice[0], :]
+#         x1_tx1 = torch.sum(x1 * x1)
+#         x1_tx2 = torch.sum(x1 * data[choice[1], :])
+#         c = 0.
+#         rhs = 0.
+#         for i in range(max_num):
+#             if not i in choice_set:
+#                 c -= params[i] * label[i, 0]
+#                 rhs += params[i] * label[i, 0] * y1 * torch.sum(x1 * data[i, :])
+#         rhs += c * y1 * x1_tx2 - 1 + y1 / y2
+#         lhs = 2 * x1_tx2 - x1_tx1
+#         if abs(lhs) < 1e-5:
+#             continue
+#         possible_a = rhs / lhs
+#         if possible_a < 0.:
+#             possible_a = 0.
+#         params[choice[0]] = possible_a
+#         params[choice[1]] = (c - possible_a * y1) / y2
+    
+#     print("Iteration completed.")
+#     print(params)
+#     w0 = torch.sum(label * params.unsqueeze(dim = -1) * data, dim = 0)
+#     b_sum = 0
+#     for i in range(0, max_num, 3):
+#         bi = label[i, 0] - torch.sum(w0 * data[i])
+#         b_sum += bi
+#     print(w0)
+#     print(0.5 * b_sum)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -57,14 +96,11 @@ if __name__ == "__main__":
 
         print("Epoch (%4d / %4d)\tLoss: %.6f"%(i, args.epochs, loss))
 
-    print("Best alphas:", svm_dual.params)
-
     w0 = torch.sum(label * svm_dual.params * data, dim = 0).detach()
-    
     
     cnt = 0
     b_sum = 0
-    for i in range(4):
+    for i in range(svm_dual.params.shape[0]):
         bi = label[i, 0] - torch.sum(w0 * data[i])
         if svm_dual.params[i, 0] > 1.:
             b_sum += bi
@@ -73,8 +109,15 @@ if __name__ == "__main__":
 
     xs = torch.linspace(-1, 2, 6)
     ys = -(w0[0] * xs + b) / w0[1]
-    plt.plot(xs, ys)
-    plt.scatter(data[:, 0], data[:, 1])
+    half_len = data.shape[0] >> 1
     print(w0)
     print(b)
+    plt.plot(xs, ys)
+    plt.scatter(data[:half_len, 0], data[:half_len, 1], c = 'r', label = 'class 1')
+    plt.scatter(data[half_len:, 0], data[half_len:, 1], c = 'b', label = 'class 2')
+    plt.xlim(-0.5, 2.5)
+    plt.ylim(-0.5, 2.5)
+    plt.grid(axis = 'both')
+    plt.legend()
     plt.show()
+    # stochastic_coordinate_descend(data, label, 6, 10000)

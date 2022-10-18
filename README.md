@@ -58,3 +58,30 @@ python3 ./knn_gridsearch.py
 ​		第三种运行方式：代表进行Grid Search
 
 ​		每一种方式结束后，都会执行`k=3-49`的`n_neighbors`对训练、测试集精度影响分析的绘图。
+
+---
+
+### 10.8 HW4
+
+​		运行MLP代码，需要使用Pytorch（基于pytorch的实现），如果您环境装的好（Pytorch的wheel CUDA版本与本地CUDA版本一致），那么应该可以使用Nvidia APEX混合精度加速库。则无需修改，直接使用如下方法运行：
+
+```shell
+cd exe4/
+mkdir check_points/
+python3 ./custom_mlp.py -s
+```
+
+​		如果您无法使用APEX加速库，则去掉`-s` flag（本实现不支持native amp，则不会进行任何混合精度加速）。
+
+---
+
+### 10.15 HW5
+
+​		SVM对偶问题求解，依赖库：`pytorch`（CPU版本即可），`matplotlib`。运行方法如下：
+
+```shell
+cd exe5/
+python3 ./svm_auto.py
+```
+
+---

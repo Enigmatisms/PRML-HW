@@ -4,7 +4,6 @@ import matplotlib.pyplot as plt
 import torch.nn.functional as F
 from torch import nn
 from torch import optim
-import random
 
 class Penalty(nn.Module):
     def __init__(self, k1 = 0.01, k2 = 500.): 
@@ -65,6 +64,11 @@ class Alpha(nn.Module):
 #     print(w0)
 #     print(0.5 * b_sum)
 
+def get_line(w: torch.Tensor, b: float):
+    xs = torch.linspace(-1, 2, 6)
+    ys = -(w[0] * xs + b) / w[1]
+    return xs, ys
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--epochs", type = int, default = 3000, help = "Training lasts for . epochs")
@@ -73,6 +77,9 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
+    original_data = torch.FloatTensor([
+        [1, 1], [2, 0], [2, 2], [0, 0], [1, 0], [0, 1]
+    ])
 
     data = torch.FloatTensor([
         [1, 1], [2, 0], [1, 0], [0, 1]
@@ -106,15 +113,20 @@ if __name__ == "__main__":
             b_sum += bi
             cnt += 1
     b = b_sum / cnt
+    w_best = torch.FloatTensor([2, 2])
+    b_best = -3.
 
-    xs = torch.linspace(-1, 2, 6)
-    ys = -(w0[0] * xs + b) / w0[1]
-    half_len = data.shape[0] >> 1
+    xs, ys = get_line(w0, b)
+    xs_best, ys_best = get_line(w_best, b_best)
+    
+    half_len = original_data.shape[0] >> 1
     print(w0)
     print(b)
-    plt.plot(xs, ys)
-    plt.scatter(data[:half_len, 0], data[:half_len, 1], c = 'r', label = 'class 1')
-    plt.scatter(data[half_len:, 0], data[half_len:, 1], c = 'b', label = 'class 2')
+    print(svm_dual.params)
+    # plt.plot(xs, ys, c = 'k', linestyle = '--', label = 'Dual problem hyperplane')
+    plt.plot(xs_best, ys_best, c = 'k', label = 'Inspection hyperplae')
+    plt.scatter(original_data[:half_len, 0], original_data[:half_len, 1], c = 'r', label = 'class 1')
+    plt.scatter(original_data[half_len:, 0], original_data[half_len:, 1], c = 'b', label = 'class 2')
     plt.xlim(-0.5, 2.5)
     plt.ylim(-0.5, 2.5)
     plt.grid(axis = 'both')

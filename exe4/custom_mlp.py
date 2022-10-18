@@ -1,7 +1,6 @@
 import torch
 from torch import nn
 from torch import optim
-from apex import amp
 from timer import Timer
 from LinearLayer import LinearLayer
 
@@ -106,15 +105,15 @@ if __name__ == "__main__":
     parser.add_argument("--batch_size", type = int, default = 200, help = "Training lasts for . epochs")
     parser.add_argument("--eval_time", type = int, default = 50, help = "Tensorboard output interval (train time)")
     parser.add_argument("--output_time", type = int, default = 10, help = "Image output interval (train time)")
-    # 0.0000001 (2)  0.00001 (3) 0.0001(2) 0.001(2) 0.01(2) 0.000001 (1) 0 (2)
     parser.add_argument("--name", type = str, default = "chkpt_001", help = "Checkpoint file name")
-    parser.add_argument("--opt_mode", type = str, default = "O2", help = "Optimization mode: none, O1, O2 (apex amp)")
+    parser.add_argument("--opt_mode", type = str, default = "O1", help = "Optimization mode: none, O1, O2 (apex amp)")
     parser.add_argument("--decay_rate", type = float, default = 0.996, help = "After <decay step>, lr = lr * <decay_rate>")
     parser.add_argument("--lr", type = float, default = 1e-3, help = "Start lr")
 
     parser.add_argument("-d", "--del_dir", default = False, action = "store_true", help = "Delete dir ./logs and start new tensorboard records")
     parser.add_argument("-l", "--load", default = False, action = "store_true", help = "Load checkpoint or trained model.")
     parser.add_argument("-s", "--use_scaler", default = False, action = "store_true", help = "Use AMP scaler to speed up")
+    parser.add_argument("-c", "--cross_validate", default = False, action = "store_true", help = "Use cross validation")
     args = parser.parse_args()
 
     load_path           = "./check_points/" + args.name + ".pt"
@@ -126,6 +125,9 @@ if __name__ == "__main__":
     del_dir             = args.del_dir
     use_load            = args.load
 
+    if opt_mode in {"O1", "O2"}:
+        from apex import amp
+
     clf = MLP()
     clf.cuda()
 
@@ -136,10 +138,19 @@ if __name__ == "__main__":
     _, _, np_train, np_train_labels = get_samples("../exe2/data/train1_icu_data.csv", "../exe2/data/train1_icu_label.csv", ret_raw = True)
     _, _, np_test, np_test_labels = get_samples("../exe2/data/test1_icu_data.csv", "../exe2/data/test1_icu_label.csv", ret_raw = True)
 
-    train_set = torch.from_numpy(np_train).float()
-    test_set = torch.from_numpy(np_test).float()
-    train_labels = torch.from_numpy(np_train_labels).float()
-    test_labels = torch.from_numpy(np_test_labels).float()
+    if args.cross_validate:
+        # 2-fold cross validation
+        length = np_train.shape[0] >> 1
+        train_set = torch.from_numpy(np_train[length:, ...]).float()
+        test_set = torch.from_numpy(np_train[:length, ...]).float()
+        train_labels = torch.from_numpy(np_train_labels[length:, ...]).float()
+        test_labels = torch.from_numpy(np_train_labels[:length, ...]).float()
+    else:
+        train_set = torch.from_numpy(np_train).float()
+        test_set = torch.from_numpy(np_test).float()
+        train_labels = torch.from_numpy(np_train_labels).float()
+        test_labels = torch.from_numpy(np_test_labels).float()
+
 
     train_dataset = TensorDataset(train_set, train_labels)
     test_dataset = TensorDataset(test_set, test_labels)

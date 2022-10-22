@@ -75,7 +75,7 @@ python3 ./custom_mlp.py -s
 
 ---
 
-### 10.15 HW5
+### 10.15 HW5 (simple SVM)
 
 ​		SVM对偶问题求解，依赖库：`pytorch`（CPU版本即可），`matplotlib`。运行方法如下：
 
@@ -85,3 +85,25 @@ python3 ./svm_auto.py
 ```
 
 ---
+
+### 10.21 HW5 - 2 (SVM package)
+
+​		SVM（调用`sklearn`库进行了三种不同kernel函数的实验）。本代码并不提供简单的`kernel`函数切换，如果需要切换`kernel`，请自行修改代码中的（42-46）行:
+
+```python
+parameters = {'C': 0.5,
+        'kernel' : 'poly',
+        'degree': 3,
+        'gamma': 'auto'
+}
+```
+
+​		如果需要测试grid search，将`if __name__ == "__main__"`块中的`svm_test()`替换为`grid_search_params()`。使用如下方式运行：
+
+```shell
+cd exe5/
+python3 ./svm_sklearn.py
+```
+
+
+

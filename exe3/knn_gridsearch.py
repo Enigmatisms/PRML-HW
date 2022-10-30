@@ -8,6 +8,7 @@ import numpy as np
 from sklearn.decomposition import PCA
 from sklearn.neighbors import KNeighborsClassifier 
 from sklearn.model_selection import StratifiedKFold, GridSearchCV
+from sklearn.model_selection import cross_val_score
 import matplotlib.pyplot as plt
 import sys
 import tqdm
@@ -25,9 +26,9 @@ def knn_test(tag):
         clf = KNeighborsClassifier(algorithm='ball_tree', n_neighbors=22, weights='distance')
     else:
         clf = KNeighborsClassifier()
-    pca = PCA(n_components = 16)
-    train_set = pca.fit_transform(train_set, train_label)
-    test_set = pca.fit_transform(test_set, test_label)
+    # pca = PCA(n_components = 16)
+    # train_set = pca.fit_transform(train_set, train_label)
+    # test_set = pca.fit_transform(test_set, test_label)
 
     clf.fit(train_set, train_label.ravel())
     train_pred_label = clf.predict(train_set)
@@ -35,9 +36,11 @@ def knn_test(tag):
 
     train_acc = acc_calculate(train_pred_label, train_label)
     test_acc = acc_calculate(test_pred_label, test_label)
+    cv_score = cross_val_score(clf, train_set, train_label.ravel(), cv = 5)
 
     print("Train set accuracy: %f, train set error rate: %f"%(train_acc, 1 - train_acc))
     print("Test set accuracy: %f, test set error rate: %f"%(test_acc, 1 - test_acc))
+    print("Cross validation: ", cv_score)
     print("NN num: %d"%(clf.n_neighbors))
 
     """

@@ -29,6 +29,11 @@ class PCA:
 
         self.principal_comps = U[:, :self.n_components]
 
+    def transform(self, X: np.ndarray):
+        if self.principal_ratio is None:
+            self.forward(X)
+        return X @ self.principal_comps
+
     def plot_principal(self, show = True):
         plt.figure(0)
         plt.imshow(np.diag(self.principal_ratio))

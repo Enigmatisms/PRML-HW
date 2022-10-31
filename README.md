@@ -105,5 +105,23 @@ cd exe5/
 python3 ./svm_sklearn.py
 ```
 
+---
 
+### 10.31 HW6 (Feature Selection & Extraction & LASSO)
+
+​		在`exe6/`文件夹中包含了两个文件：
+
+```
+knn_gridsearch.py --------- 包含了PCA-based feature extraction\PCA-KNN\KNN Grid Search\LASSO\LASSO Grid Search
+pca.py -------------------- 包含了自己实现的PCA算法
+```
+
+​		运行：
+
+```shell
+cd exe6/
+python3 ./knn_gridsearch.py				  // 什么都不加：lasso grid search
+python3 ./knn_gridsearch.py	0或1			  // 进行knn测试
+python3 ./knn_gridsearch.py	2及以上		// 进行lasso测试
+```
 

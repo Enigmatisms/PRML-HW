@@ -125,3 +125,22 @@ python3 ./knn_gridsearch.py	0或1			  // 进行knn测试
 python3 ./knn_gridsearch.py	2及以上		// 进行lasso测试
 ```
 
+---
+
+### 11.6 HW7 (Random Forest)
+
+​		在`exe7/`文件夹中包含了两个文件：
+
+```
+rf_exps.py --------- 直接使用参数运行Random Forest
+rf_gridsearch.py -------------------- 包含了随机森林参数搜索代码
+```
+
+​		运行：
+
+```shell
+cd exe7/
+python3 ./rf_exps.py			// 测试OOB / bootstrap 等参数
+python3 ./rf_gridsearch.py		// 测试随机森林参数搜索
+```
+

@@ -144,3 +144,28 @@ python3 ./rf_exps.py			// 测试OOB / bootstrap 等参数
 python3 ./rf_gridsearch.py		// 测试随机森林参数搜索
 ```
 
+---
+
+### 11.13 HW8 (Naive Bayes Classifier)
+
+​		在`exe8/`文件夹中包含了两个文件：
+
+```
+nb.py --------- 包含了参数搜索与Navie Bayes分类器的测试（包含minimal risk classifier）
+distribute.py ---------- 参数的概率分布可视化
+```
+
+​		运行：
+
+```shell
+cd exe7/
+python3 ./nb.py				// 测试Navie Bayes分类器
+python3 ./distribute.py		// 测试参数概率分布可视化
+```
+
+​		其中，参数概率分布可视化如果要实验前五种（importance最高的feature）feature，可以修改最后一行的解包：
+
+```python
+histogram(*MAIN_5)			// 改为MAIN_1或者其他几种feature，这里的数字代表了importance排序
+```
+

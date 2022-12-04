@@ -169,3 +169,31 @@ python3 ./distribute.py		// 测试参数概率分布可视化
 histogram(*MAIN_5)			// 改为MAIN_1或者其他几种feature，这里的数字代表了importance排序
 ```
 
+---
+
+### 12.4 HW9 (Clustering & PCA)
+
+​		`exe9/`文件夹中包仅包含了一个文件：
+
+```
+mnist_clustering.py --- exercise 9全部代码
+```
+
+​		此代码有额外依赖项（除了常用的`sklearn`，`matplotlib`, `numpy`之外）：`mlxtend`。如果需要安装，请使用以下方式进行安装：
+
+```shell
+pip3 install mlxtend
+```
+
+​		需要测试不同的实验方式，则修改`mnist_clustering.py`中的参数：
+
+```python
+num_clusters = 2				# 聚类簇数量
+examples = 6				    # 每个簇用于可视化的图片数量	 
+use_pca = True				    # 是否使用PCA
+# 以及第31行
+pca = PCA(n_components = 100)	   # 修改主成分数量
+# 以及第61行
+clustered = pca_kmeans_clustering(images, num_clusters, examples, scree_plot = True)
+# 最后一个参数（scree_plot），如果为true则会绘制scree_plot
+```

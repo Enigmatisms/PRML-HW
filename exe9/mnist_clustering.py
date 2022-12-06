@@ -9,7 +9,15 @@ def get_mnist(path:str):
             images_path=f'{path}train-images.idx3-ubyte', 
             labels_path=f'{path}train-labels.idx1-ubyte')
     
-def multi_imshow(X: np.ndarray, rows = 4, cols = 4):
+def multi_imshow(X: np.ndarray, rows = 4, cols = 4, extra_data = None):
+    if extra_data is not None:
+        plt.figure(1)
+        for i, data in enumerate(extra_data):
+            plt.scatter(data[:, 0], data[:, 1], s = 7, label = f'cluster {i + 1}')
+        plt.grid(axis = 'both')
+        plt.legend()
+        plt.show()
+        plt.figure(2)
     for i in range(rows):
         for j in range(cols):
             img_id = cols * i + j
@@ -28,7 +36,8 @@ def vanilla_kmeans_clustering(data: np.ndarray, n_cluster = 4, num_examples = 4)
     return np.concatenate(results, axis = 1).reshape(n_cluster * num_examples, -1)
 
 def pca_kmeans_clustering(data: np.ndarray, n_cluster = 4, num_examples = 4, scree_plot = False):
-    pca = PCA(n_components = 100)
+    n_comp = 2
+    pca = PCA(n_components = n_comp)
     if scree_plot:
         pca.fit(data)
         scree_values = pca.explained_variance_ratio_
@@ -40,6 +49,7 @@ def pca_kmeans_clustering(data: np.ndarray, n_cluster = 4, num_examples = 4, scr
         plt.plot(line_xs, line_ys, c = 'b', alpha = 0.7, linestyle = '--')
         plt.grid(axis = 'both')
         plt.show()
+        return None, None
     else:
         clt = KMeans(n_clusters = n_cluster)
         transformed = pca.fit_transform(data)
@@ -48,19 +58,25 @@ def pca_kmeans_clustering(data: np.ndarray, n_cluster = 4, num_examples = 4, scr
         for i in range(n_cluster):
             examples = data[labels == i][:num_examples]
             results.append(examples)
-        return np.concatenate(results, axis = 1).reshape(n_cluster * num_examples, -1)
+        if n_comp == 2:
+            result = []
+            for i in range(n_cluster):
+                result.append(transformed[labels == i])
+            return np.concatenate(results, axis = 1).reshape(n_cluster * num_examples, -1), result
+        return np.concatenate(results, axis = 1).reshape(n_cluster * num_examples, -1), None
     
 if __name__ == "__main__":
-    num_clusters = 2
+    num_clusters = 10
     examples = 6
     use_pca = True
     X, y = get_mnist("../exe2/data/")
-    is_three = y == 7
+    is_three = y == 3
     images = X[is_three]
     if use_pca:
-        clustered = pca_kmeans_clustering(images, num_clusters, examples, scree_plot = True)
+        clustered, extra = pca_kmeans_clustering(images, num_clusters, examples, scree_plot = False)
     else:
         clustered = vanilla_kmeans_clustering(images, num_clusters, examples)
+        extra = None
     if clustered is not None:
-        multi_imshow(clustered, examples, num_clusters)
+        multi_imshow(clustered, examples, num_clusters, extra)
     
